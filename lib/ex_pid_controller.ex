@@ -17,35 +17,29 @@ defmodule ExPidController do
   Error = Setpoint – Process Value
   """
 
-  @doc """
-  The Proportional math:
-  P = Proportional | kP = Proportional Gain | SP = Set point | PV = Process Value | Err = Error
-
-  Err = SP – PV
-  P = kP x Err
-  """
+  # The Proportional math:
+  # P = Proportional | kP = Proportional Gain | SP = Set point | PV = Process Value | Err = Error
+  #
+  # Err = SP – PV
+  # P = kP x Err
   defp proportional(proportional_gain, set_point, process_value) do
     error = error(set_point, process_value)
     proportional_gain * error
   end
 
-  @doc """
-  Integral math:
-  I = Integral | kI = Integral Gain | dt = cycle time of the controller | It = Integral Total
-
-  I = kI x Err x dt
-  It = It + I
-  """
+  # Integral math:
+  # I = Integral | kI = Integral Gain | dt = cycle time of the controller | It = Integral Total
+  #
+  # I = kI x Err x dt
+  # It = It + I
   defp integral(integral_gain, set_point, process_value, cycle_time) do
     integral_gain * error(set_point, process_value) * cycle_time
   end
 
-  @doc """
-  The Derivative Math:
-  D = Derivative | kD = Derivative Gain | dt = cycle time of the controller | pErr = Previous Error
-
-  D = kD x (Err – pErr) / dt
-  """
+  # The Derivative Math:
+  # D = Derivative | kD = Derivative Gain | dt = cycle time of the controller | pErr = Previous Error
+  #
+  # D = kD x (pErr – Err) / dt
   defp derivative(derivative_gain, set_point, process_value, previous_error, cycle_time) do
     derivative_gain * (error(set_point, process_value) - previous_error) / cycle_time
   end
