@@ -17,6 +17,30 @@ defmodule ExPidController do
   Error = Setpoint – Process Value
   """
 
+  defstruct kp: 0,
+            ki: 0,
+            kd: 0,
+            cycle_time: 1,
+            previous_error: 0,
+            integral_total: 0,
+            error: 0,
+            output: 0
+
+  def new(opts \\ []) do
+    struct(__MODULE__, opts)
+  end
+
+  def step(%ExPidController{} = pid, set_point, process_value) do
+    error = error(set_point, process_value)
+    proportional = proportional(pid.kp, set_point, process_value)
+    integral = integral(pid.ki, set_point, process_value, pid.cycle_time)
+    integral_total = pid.integral_total + integral
+    derivative = derivative(pid.kd, set_point, process_value, pid.previous_error, pid.cycle_time)
+    output = proportional + integral_total + derivative
+
+    %{pid | previous_error: error, integral_total: integral_total, error: error, output: output}
+  end
+
   # The Proportional math:
   # P = Proportional | kP = Proportional Gain | SP = Set point | PV = Process Value | Err = Error
   #
@@ -42,27 +66,6 @@ defmodule ExPidController do
   # D = kD x (pErr – Err) / dt
   defp derivative(derivative_gain, set_point, process_value, previous_error, cycle_time) do
     derivative_gain * (previous_error - error(set_point, process_value)) / cycle_time
-  end
-
-  @doc """
-  returns:
-
-  {previous_error, integral_total, output}
-  """
-  def output(
-        set_point: set_point,
-        process_value: process_value,
-        integral_total: integral_total,
-        cycle_time: cycle_time,
-        previous_error: previous_error,
-        gains: {proportional_gain, integral_gain, derivative_gain}
-      ) do
-    error = error(set_point, process_value)
-    proportional = proportional(proportional_gain, set_point, process_value)
-    integral = integral(integral_gain, set_point, process_value, cycle_time)
-    integral_total = integral_total + integral
-    derivative = derivative(derivative_gain, set_point, process_value, previous_error, cycle_time)
-    {error, integral_total, proportional + integral_total + derivative}
   end
 
   defp error(set_point, process_value) do
