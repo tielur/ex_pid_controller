@@ -41,7 +41,7 @@ defmodule ExPidController do
   #
   # D = kD x (pErr – Err) / dt
   defp derivative(derivative_gain, set_point, process_value, previous_error, cycle_time) do
-    derivative_gain * (error(set_point, process_value) - previous_error) / cycle_time
+    derivative_gain * (previous_error - error(set_point, process_value)) / cycle_time
   end
 
   @doc """
