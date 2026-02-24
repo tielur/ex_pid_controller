@@ -17,7 +17,7 @@ defmodule ExPidControllerTest do
 
     merged = Keyword.merge(defaults, opts)
 
-    pid = ExPidController.new(
+    controller = ExPidController.new(
       kp: merged[:kp],
       ki: merged[:ki],
       kd: merged[:kd],
@@ -26,7 +26,7 @@ defmodule ExPidControllerTest do
       integral_total: merged[:integral_total]
     )
 
-    ExPidController.step(pid, merged[:set_point], merged[:process_value])
+    ExPidController.step(controller, merged[:set_point], merged[:process_value])
   end
 
   describe "error" do

@@ -37,7 +37,7 @@ Create a controller with `ExPidController.new/1`, then call `ExPidController.ste
 
 ```elixir
 # Initialize once
-pid = ExPidController.new(
+controller = ExPidController.new(
   kp: 1.0,
   ki: 0.5,
   kd: 0.25,
@@ -45,37 +45,46 @@ pid = ExPidController.new(
 )
 
 # Each cycle:
-pid = ExPidController.step(pid, 100, current_value)
+controller = ExPidController.step(controller, 100, current_value)
 
 # Read the output and apply to your actuator, then repeat next cycle
-pid.output
+controller.output
 ```
 
 ## Example
 
-Simulate a cruise control loop targeting 60 mph from a starting speed of 40 mph:
+Simulate a car cruise control loop targeting 60 mph from a starting speed of 40 mph:
 
 ```elixir
-pid = ExPidController.new(kp: 0.8, ki: 0.2, kd: 0.1, cycle_time: 1)
+# Target speed and starting speed (mph)
+set_point = 60
+initial_speed = 40.0
 
-{_pid, _speed} =
-  Enum.reduce(1..10, {pid, 40.0}, fn step, {pid, speed} ->
-    pid = ExPidController.step(pid, 60, speed)
-    speed = speed + pid.output * 0.5
-    IO.puts("Step #{step}: speed=#{Float.round(speed, 1)}, output=#{Float.round(pid.output, 2)}")
-    {pid, speed}
+# vehicle_response simulates how much the throttle moves the car each cycle
+# (a simplified stand-in for real-world inertia and friction)
+vehicle_response = 0.5
+
+controller = ExPidController.new(kp: 0.8, ki: 0.2, kd: 0.1, cycle_time: 1)
+
+# Simulate 10 one-second control cycles
+{_controller, _speed} =
+  Enum.reduce(1..10, {controller, initial_speed}, fn cycle, {controller, speed} ->
+    controller = ExPidController.step(controller, set_point, speed)
+    speed = speed + controller.output * vehicle_response
+    IO.puts("Cycle #{cycle}: speed=#{Float.round(speed, 1)}, output=#{Float.round(controller.output, 2)}")
+    {controller, speed}
   end)
 
-# Step 1: speed=49.0, output=18.0
-# Step 2: speed=57.0, output=15.9
-# Step 3: speed=62.0, output=10.04
-# Step 4: speed=64.6, output=5.34
-# Step 5: speed=65.7, output=2.04
-# Step 6: speed=65.6, output=-0.07
-# Step 7: speed=65.0, output=-1.27
-# Step 8: speed=64.1, output=-1.82
-# Step 9: speed=63.1, output=-1.94
-# Step 10: speed=62.2, output=-1.79
+# Cycle 1: speed=49.0, output=18.0
+# Cycle 2: speed=57.0, output=15.9
+# Cycle 3: speed=62.0, output=10.04
+# Cycle 4: speed=64.6, output=5.34
+# Cycle 5: speed=65.7, output=2.04
+# Cycle 6: speed=65.6, output=-0.07
+# Cycle 7: speed=65.0, output=-1.27
+# Cycle 8: speed=64.1, output=-1.82
+# Cycle 9: speed=63.1, output=-1.94
+# Cycle 10: speed=62.2, output=-1.79
 ```
 
 ## Running Tests
