@@ -1,20 +1,21 @@
 defmodule ExPidController do
   @moduledoc """
-  PID Controller Loop
-  https://pidexplained.com/pid-controller-explained/
+  A discrete [PID controller](https://pidexplained.com/pid-controller-explained/) for feedback control loops.
 
-  The set point is normally a user entered value, in cruise control it would be the set speed, or for a heating system, it would be the set temperature.
+  ## Concepts
 
-  Process Value
-  The process value is the value that is being controlled. For cruise control this would be the actual vehicle speed, or in a heating system, this would be the current temperature of the system.
+  | Term | Description |
+  |------|-------------|
+  | **Set Point (SP)** | The target value (e.g. desired speed or temperature) |
+  | **Process Value (PV)** | The current measured value being controlled |
+  | **Error** | `SP - PV` — the difference between target and current |
+  | **Output** | The correction signal sent to the actuator (e.g. throttle, valve) |
 
-  Output
-  The output is the controlled value of a PID controller. In cruise control, the output would be the throttle valve, in a heating system, the output might be a 3 way valve in a heating loop, or the amount of fuel applied to a boiler.
+  The output is the sum of three terms:
 
-  Error
-  The error value is the value used by the PID controller to determine the how to manipulate the output to bring the process value to the set point.
-
-  Error = Setpoint – Process Value
+  - **Proportional (P)** — reacts to the current error: `kP × Err`
+  - **Integral (I)** — accumulates past error over time: `kI × Err × dt`
+  - **Derivative (D)** — reacts to the rate of error change: `kD × (pErr - Err) / dt`
 
   ## Example
 
